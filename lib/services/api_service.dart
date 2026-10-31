@@ -9,13 +9,11 @@ import '../models/questionnaire_answers.dart';
 import '../models/social_account.dart';
 import '../models/user.dart';
 import 'mock_data.dart';
+import 'supabase_service.dart';
 
 /// Gateway to the CreateIQ backend.
 ///
-/// Every method currently returns mock data after a short delay. To connect a
-/// real backend, replace each method body with an HTTP call to the matching
-/// endpoint in [ApiEndpoints] (e.g. using `package:http` or `dio`). Callers
-/// don't need to change.
+/// Integrates with Supabase Authentication (or offline mock fallback).
 class ApiService {
   ApiService({Random? random}) : _rnd = random ?? Random();
 
@@ -29,27 +27,51 @@ class ApiService {
   // Auth
   // ---------------------------------------------------------------------------
 
-  /// POST [ApiEndpoints.login]
+  /// Login via Supabase Auth (or mock fallback).
   Future<User> login(String email, String password) async {
+    final supabase = SupabaseService.instance;
+    if (supabase.isInitialized) {
+      return supabase.signIn(email: email, password: password);
+    }
     await _latency(const Duration(milliseconds: 900));
     final name = _nameFromEmail(email);
     return MockData.demoUser(name: name, email: email);
   }
 
-  /// POST [ApiEndpoints.signUp]
-  Future<User> signUp(String name, String email, String password) async {
+  /// Sign up via Supabase Auth (or mock fallback).
+  Future<SignUpResult> signUp(String name, String email, String password) async {
+    final supabase = SupabaseService.instance;
+    if (supabase.isInitialized) {
+      return supabase.signUp(name: name, email: email, password: password);
+    }
     await _latency(const Duration(milliseconds: 900));
-    return MockData.demoUser(name: name, email: email);
+    final user = MockData.demoUser(name: name, email: email);
+    return SignUpResult(requiresEmailConfirmation: false, user: user);
   }
 
-  /// POST [ApiEndpoints.googleSignIn]
+  /// Sign in with Google (demo button).
   Future<User> signInWithGoogle() async {
     await _latency(const Duration(milliseconds: 900));
     return MockData.demoUser();
   }
 
-  /// POST [ApiEndpoints.forgotPassword]
-  Future<void> sendPasswordReset(String email) => _latency(const Duration(milliseconds: 700));
+  /// Send password reset link via Supabase Auth.
+  Future<void> sendPasswordReset(String email) async {
+    final supabase = SupabaseService.instance;
+    if (supabase.isInitialized) {
+      await supabase.sendPasswordReset(email);
+      return;
+    }
+    await _latency(const Duration(milliseconds: 700));
+  }
+
+  /// Sign out via Supabase Auth.
+  Future<void> logout() async {
+    final supabase = SupabaseService.instance;
+    if (supabase.isInitialized) {
+      await supabase.signOut();
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Accounts & posts
