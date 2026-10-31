@@ -7,11 +7,13 @@ import 'core/theme/app_theme.dart';
 import 'providers/core_providers.dart';
 import 'providers/settings_provider.dart';
 import 'services/storage_service.dart';
+import 'services/supabase_service.dart';
 
-/// Entry point: initialise local storage, then start the app inside a ProviderScope.
+/// Entry point: initialise local storage & Supabase, then start the app inside a ProviderScope.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final storage = await StorageService.init();
+  await SupabaseService.instance.init();
 
   runApp(
     ProviderScope(
