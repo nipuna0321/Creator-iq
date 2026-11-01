@@ -1,0 +1,5 @@
+package com.createiq.createiq
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()
