@@ -90,14 +90,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        final message = e.toString()
+        final message = e
+            .toString()
             .replaceAll('Exception: ', '')
             .replaceAll('AuthException: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: AppColors.danger,
-          ),
+          SnackBar(content: Text(message), backgroundColor: AppColors.danger),
         );
       }
     } finally {
@@ -113,7 +111,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (msg.contains('email not confirmed')) {
       return 'Your email is not verified yet. Please check your inbox for the confirmation link.';
     }
-    if (msg.contains('user already registered') || msg.contains('already exists')) {
+    if (msg.contains('user already registered') ||
+        msg.contains('already exists')) {
       return 'An account with this email already exists. Please log in.';
     }
     if (msg.contains('password should be at least')) {
@@ -126,14 +125,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.radius)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.radius),
+        ),
         icon: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: AppColors.violet.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: const Icon(LucideIcons.mailCheck, color: AppColors.violet, size: 36),
+          child: const Icon(
+            LucideIcons.mailCheck,
+            color: AppColors.violet,
+            size: 36,
+          ),
         ),
         title: const Text('Verify Your Email', textAlign: TextAlign.center),
         content: Text(
@@ -167,10 +172,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (mounted) {
         final message = e.toString().replaceAll('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: AppColors.danger,
-          ),
+          SnackBar(content: Text(message), backgroundColor: AppColors.danger),
         );
       }
     } finally {
@@ -182,7 +184,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _afterAuth() {
     if (!mounted) return;
     final user = ref.read(userProvider);
-    final hasData = (user?.connectedAccounts.isNotEmpty ?? false) ||
+    final hasData =
+        (user?.connectedAccounts.isNotEmpty ?? false) ||
         ref.read(storageProvider).getJsonList(AppConstants.kPosts).isNotEmpty;
     context.go(hasData ? Routes.home : Routes.connect);
   }
@@ -195,54 +198,73 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       isScrollControlled: true,
       builder: (ctx) {
         var sending = false;
-        return StatefulBuilder(builder: (ctx, setSheet) {
-          return Padding(
-            padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.viewInsetsOf(ctx).bottom + 24),
-            child: Form(
-              key: key,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Reset password', style: ctx.text.titleLarge),
-                  const SizedBox(height: 6),
-                  Text('We\'ll email you a link to reset your password.', style: ctx.text.bodyMedium),
-                  const SizedBox(height: 20),
-                  CustomTextField(
-                    controller: controller,
-                    hint: 'you@example.com',
-                    icon: LucideIcons.mail,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: _validateEmail,
-                  ),
-                  const SizedBox(height: 20),
-                  GradientButton(
-                    label: 'Send reset link',
-                    loading: sending,
-                    onPressed: () async {
-                      if (!key.currentState!.validate()) return;
-                      setSheet(() => sending = true);
-                      final messenger = ScaffoldMessenger.of(context);
-                      try {
-                        await ref.read(apiServiceProvider).sendPasswordReset(controller.text.trim());
-                        if (!ctx.mounted) return;
-                        Navigator.pop(ctx);
-                        messenger.showSnackBar(
-                          const SnackBar(content: Text('Reset link sent! Check your inbox.')),
-                        );
-                      } catch (e) {
-                        setSheet(() => sending = false);
-                        messenger.showSnackBar(
-                          SnackBar(content: Text(e.toString()), backgroundColor: AppColors.danger),
-                        );
-                      }
-                    },
-                  ),
-                ],
+        return StatefulBuilder(
+          builder: (ctx, setSheet) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                24,
+                24,
+                MediaQuery.viewInsetsOf(ctx).bottom + 24,
               ),
-            ),
-          );
-        });
+              child: Form(
+                key: key,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Reset password', style: ctx.text.titleLarge),
+                    const SizedBox(height: 6),
+                    Text(
+                      'We\'ll email you a link to reset your password.',
+                      style: ctx.text.bodyMedium,
+                    ),
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      controller: controller,
+                      hint: 'you@example.com',
+                      icon: LucideIcons.mail,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: _validateEmail,
+                    ),
+                    const SizedBox(height: 20),
+                    GradientButton(
+                      label: 'Send reset link',
+                      loading: sending,
+                      onPressed: () async {
+                        if (!key.currentState!.validate()) return;
+                        setSheet(() => sending = true);
+                        final messenger = ScaffoldMessenger.of(context);
+                        try {
+                          await ref
+                              .read(apiServiceProvider)
+                              .sendPasswordReset(controller.text.trim());
+                          if (!ctx.mounted) return;
+                          Navigator.pop(ctx);
+                          messenger.showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Reset link sent! Check your inbox.',
+                              ),
+                            ),
+                          );
+                        } catch (e) {
+                          setSheet(() => sending = false);
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text(e.toString()),
+                              backgroundColor: AppColors.danger,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
       },
     ).whenComplete(controller.dispose);
   }
@@ -271,14 +293,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             gradient: AppColors.primaryGradient,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Icon(LucideIcons.sparkles, color: Colors.white, size: 30),
+                          child: const Icon(
+                            LucideIcons.sparkles,
+                            color: Colors.white,
+                            size: 30,
+                          ),
                         ),
-                      ).animate().scaleXY(begin: 0.6, end: 1, duration: 500.ms, curve: Curves.easeOutBack),
+                      ).animate().scaleXY(
+                        begin: 0.6,
+                        end: 1,
+                        duration: 500.ms,
+                        curve: Curves.easeOutBack,
+                      ),
                       const SizedBox(height: 24),
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 250),
                         child: Text(
-                          _signUp ? 'Create your account' : 'Welcome back 👋',
+                          _signUp ? 'Create your account' : 'Creator IQ',
                           key: ValueKey(_signUp),
                           textAlign: TextAlign.center,
                           style: context.text.headlineMedium,
@@ -286,9 +317,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _signUp ? 'Start growing smarter with CreateIQ' : 'Log in to see how your content is doing',
+                        _signUp
+                            ? 'Start growing smarter with CreateIQ'
+                            : 'Log in to see how your content is doing',
                         textAlign: TextAlign.center,
-                        style: context.text.bodyMedium?.copyWith(color: context.colors.onSurfaceVariant),
+                        style: context.text.bodyMedium?.copyWith(
+                          color: context.colors.onSurfaceVariant,
+                        ),
                       ),
                       const SizedBox(height: 32),
 
@@ -350,53 +385,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 24),
                       Row(
-                        children: [
-                          const Expanded(child: Divider()),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text('or continue with', style: context.text.bodySmall),
-                          ),
-                          const Expanded(child: Divider()),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        height: 56,
-                        child: OutlinedButton(
-                          onPressed: _loading || _googleLoading ? null : _google,
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
-                            ),
-                            side: BorderSide(color: context.colors.onSurfaceVariant.withValues(alpha: 0.3)),
-                          ),
-                          child: _googleLoading
-                              ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const _GoogleLogo(),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      'Continue with Google',
-                                      style: TextStyle(fontWeight: FontWeight.w600, color: context.colors.onSurface),
-                                    ),
-                                  ],
-                                ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(_signUp ? 'Already have an account?' : 'New to CreateIQ?', style: context.text.bodyMedium),
+                          Text(
+                            _signUp
+                                ? 'Already have an account?'
+                                : 'New to CreateIQ?',
+                            style: context.text.bodyMedium,
+                          ),
                           TextButton(
                             onPressed: () => setState(() {
                               _signUp = !_signUp;
                               _formKey.currentState?.reset();
                             }),
-                            child: Text(_signUp ? 'Log in' : 'Create account',
-                                style: const TextStyle(fontWeight: FontWeight.w700)),
+                            child: Text(
+                              _signUp ? 'Log in' : 'Create account',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -420,9 +427,22 @@ class _GoogleLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShaderMask(
       shaderCallback: (r) => const SweepGradient(
-        colors: [Color(0xFFEA4335), Color(0xFFFBBC05), Color(0xFF34A853), Color(0xFF4285F4), Color(0xFFEA4335)],
+        colors: [
+          Color(0xFFEA4335),
+          Color(0xFFFBBC05),
+          Color(0xFF34A853),
+          Color(0xFF4285F4),
+          Color(0xFFEA4335),
+        ],
       ).createShader(r),
-      child: const Text('G', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Colors.white)),
+      child: const Text(
+        'G',
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 }
